@@ -1,0 +1,5 @@
+<div class="main-container">
+    <div class="zetta-table-container" *ngIf="dataSize > 0">
+        <zetta-table [rowsDataSource]="tableDataSource['currentpage']" [columnsDataSource]="tableDataSource['availablecolumns']" [headerSettings]="headerSettings"></zetta-table>
+    </div>    
+</div>
