@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { Column, GridOption } from 'angular-slickgrid';
+import { Column, GridOption, FieldType, Filters, Statistic } from 'angular-slickgrid';
 import { ContentService } from '../content/content.service';
 import { identifierModuleUrl } from '@angular/compiler';
 
+
+const defaultPageSize = 20;
 @Component({
   selector: 'zetta-dashboard',
   templateUrl: './dashboard.component.html',
@@ -14,13 +16,21 @@ export class DashboardComponent implements OnInit {
   gridOptions: GridOption;
   dataset: any[];
   gridReady: boolean = false;
+  statistics: Statistic;
+  
 
   constructor(public contentSvc: ContentService) { }
 
   ngOnInit() {
     this.gridOptions = {
       enableAutoResize: false,
-      enableSorting: true
+      enableSorting: true,
+      enableFiltering: true,
+      pagination: {
+        pageSizes: [10, 15, 20, 25, 30, 40, 50, 75, 100],
+        pageSize: defaultPageSize,
+        totalItems: 0
+      },
     };
     this.getProducts();
   }
@@ -34,9 +44,16 @@ export class DashboardComponent implements OnInit {
   getProducts() {
     this.contentSvc.getDataSourcesByID(1).subscribe((data: any) => {
       this.columnDefinitions = Array.from(this.getColumns(data));
-      for (let i = 0; i < data.currentpage.length; i++) {
+      for (let i = 0; i < data.currentpage.length; ++i) {
         data.currentpage[i].id = i;
+      
       }
+    this.gridOptions.pagination.totalItems = data['totalrecords'];
+      if (this.statistics) {
+        this.statistics.totalItemCount = data['totalrecords'];
+      }
+      this.gridOptions = Object.assign({}, this.gridOptions);
+  
       this.dataset = Array.from(data.currentpage);
       this.gridReady = true;
     });
@@ -48,6 +65,7 @@ export class IcolumnDefinitions {
   name: string;
   field: string;
   sortable: boolean = true;
+  filterable:boolean = true;
   constructor(id: string, name: string, field: string) {
     this.id = id;
     this.name = name;
